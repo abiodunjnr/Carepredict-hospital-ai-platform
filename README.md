@@ -294,7 +294,7 @@ No real patient information is used in this project. All healthcare datasets are
 Toluwani Adefisoye
 AI/Data Platform Data Engineer | Analytics Engineer | Senior Power BI Developer |
 
-LinkedIn: [Add Link]
+LinkedIn: [http://www.linkedin.com/in/toluwani-adefisoye-766ab5221]
 
 GitHub: [https://github.com/abiodunjnr/Carepredict-hospital-ai-platform]
 
