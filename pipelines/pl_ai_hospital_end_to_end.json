@@ -1,0 +1,353 @@
+{
+    "name": "pl_ai_hospital_end_to_end",
+    "properties": {
+        "description": "AI Hospital Pipeline",
+        "activities": [
+            {
+                "name": "NB_01_Bronze_Generator",
+                "description": "Script that generates the operational datasets. Python and video. ",
+                "type": "DatabricksNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "1.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/rahmanenolia@cygnethealth.co.uk/01_bronze_synthetic_data_generator",
+                    "baseParameters": {
+                        "run_date": {
+                            "value": "@pipeline().parameters.p_run_date",
+                            "type": "Expression"
+                        },
+                        "days_back": {
+                            "value": "@string(pipeline().parameters.p_days_back)",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "@pipeline().parameters.p_environment",
+                            "type": "Expression"
+                        },
+                        "pipeline_run_id": {
+                            "value": "@pipeline().RunId",
+                            "type": "Expression"
+                        },
+                        "activity_name": "NB_01_Bronze_Generator"
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "NB_02_Silver_Data_Transformation",
+                "description": "Clean, Structure and Standardise the data",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "NB_01_Bronze_Generator",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "1.00:00:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 120,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/rahmanenolia@cygnethealth.co.uk/02_silver_data_transformation",
+                    "baseParameters": {
+                        "run_date": {
+                            "value": "@pipeline().parameters.p_run_date",
+                            "type": "Expression"
+                        },
+                        "days_back": {
+                            "value": "@string(pipeline().parameters.p_days_back)",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "@pipeline().parameters.p_environment",
+                            "type": "Expression"
+                        },
+                        "pipeline_run_id": {
+                            "value": "@pipeline().RunId",
+                            "type": "Expression"
+                        },
+                        "activity_name": "NB_02_Silver_Data_Transformation"
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "NB_03_Gold_Feature_Engineering",
+                "description": "Model for BI and ML Feature Table",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "NB_02_Silver_Data_Transformation",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "1.00:00:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 120,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/rahmanenolia@cygnethealth.co.uk/03_gold_layer_business_and_ml",
+                    "baseParameters": {
+                        "run_date": {
+                            "value": "@pipeline().parameters.p_run_date",
+                            "type": "Expression"
+                        },
+                        "days_back": {
+                            "value": "@string(pipeline().parameters.p_days_back)",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "@pipeline().parameters.p_environment",
+                            "type": "Expression"
+                        },
+                        "pipeline_run_id": {
+                            "value": "@pipeline().RunId\n",
+                            "type": "Expression"
+                        },
+                        "activity_name": "NB_03_Gold_Feature_Engineering"
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "NB_04_ML_Training_Scoring",
+                "description": "",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "NB_03_Gold_Feature_Engineering",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "1.00:00:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 120,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/rahmanenolia@cygnethealth.co.uk/04_ml_model_training",
+                    "baseParameters": {
+                        "run_date": {
+                            "value": "@pipeline().parameters.p_run_date",
+                            "type": "Expression"
+                        },
+                        "days_back": {
+                            "value": "@string(pipeline().parameters.p_days_back)",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "@pipeline().parameters.p_environment",
+                            "type": "Expression"
+                        },
+                        "pipeline_run_id ": {
+                            "value": "@pipeline().RunId",
+                            "type": "Expression"
+                        },
+                        "activity_name": "NB_04_ML_Training_Scoring"
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "PipelineStatus",
+                "type": "SetVariable",
+                "dependsOn": [
+                    {
+                        "activity": "NB_01_Bronze_Generator",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    },
+                    {
+                        "activity": "NB_02_Silver_Data_Transformation",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    },
+                    {
+                        "activity": "NB_03_Gold_Feature_Engineering",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    },
+                    {
+                        "activity": "NB_04_ML_Training_Scoring",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    },
+                    {
+                        "activity": "NB_05_Data_Quality_Checks",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "variableName": "PipelineStatus",
+                    "value": "Failed"
+                }
+            },
+            {
+                "name": "NB_05_Data_Quality_Checks",
+                "description": "Checks if all data quality checks passed successfully",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "NB_04_ML_Training_Scoring",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 120,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/rahmanenolia@cygnethealth.co.uk/05_data_quality_checks",
+                    "baseParameters": {
+                        "pipeline_run_id": {
+                            "value": "@pipeline().RunId",
+                            "type": "Expression"
+                        },
+                        "activity_name": "NB_05_Data_Quality_Checks",
+                        "run_date": {
+                            "value": "@pipeline().parameters.p_run_date",
+                            "type": "Expression"
+                        },
+                        "days_back": {
+                            "value": "@string(pipeline().parameters.p_days_back)",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "@pipeline().parameters.p_environment",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "NB_06_Create_Monitoring_Gold_Tables",
+                "description": "This activity populates the pipeline monitoring table",
+                "type": "DatabricksNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "NB_05_Data_Quality_Checks",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.01:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 120,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "notebookPath": "/Users/rahmanenolia@cygnethealth.co.uk/06_create_monitoring_gold_tables",
+                    "baseParameters": {
+                        "pipeline_run_id": {
+                            "value": "@pipeline().RunId",
+                            "type": "Expression"
+                        },
+                        "activity_name": "NB_06_Create_Monitoring_Gold_Tables",
+                        "run_date": {
+                            "value": "@pipeline().parameters.p_run_date",
+                            "type": "Expression"
+                        },
+                        "days_back": {
+                            "value": "@string(pipeline().parameters.p_days_back)",
+                            "type": "Expression"
+                        },
+                        "environment": {
+                            "value": "@pipeline().parameters.p_environment",
+                            "type": "Expression"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks1",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "parameters": {
+            "p_run_date": {
+                "type": "string",
+                "defaultValue": "2026-05-04"
+            },
+            "p_days_back": {
+                "type": "int",
+                "defaultValue": 30
+            },
+            "p_environment": {
+                "type": "string",
+                "defaultValue": "dev"
+            }
+        },
+        "variables": {
+            "Failed": {
+                "type": "String"
+            },
+            "PipelineStatus": {
+                "type": "String"
+            }
+        },
+        "annotations": [],
+        "lastPublishTime": "2026-05-06T04:27:10Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
