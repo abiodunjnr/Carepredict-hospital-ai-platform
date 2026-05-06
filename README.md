@@ -296,7 +296,7 @@ AI/Data Platform Data Engineer | Analytics Engineer | Senior Power BI Developer 
 
 LinkedIn: [Add Link]
 
-GitHub: [Add Link]
+GitHub: [https://github.com/abiodunjnr/Carepredict-hospital-ai-platform]
 
 Website: [https://great-poinsettia-097.notion.site/Azure-AI-Data-Platform-309efec6ad42804aba9ecbed8f77ad33]
 
